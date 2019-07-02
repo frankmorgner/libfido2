@@ -113,6 +113,97 @@ string_read(FILE *f, char **out)
 	return (0);
 }
 
+#include "vpcd.h"
+
+static unsigned char *rapdu = NULL;
+static ssize_t rapdu_len = 0;
+
+static void *
+dummy_open(const char *path)
+{
+	(void)path;
+
+	struct vicc_ctx *ctx = vicc_init(NULL, 35969);
+
+	if (vicc_connect(ctx, 20, 0)) {
+		rapdu_len = 0;
+		return ctx;
+	} else {
+		vicc_exit(ctx);
+		return NULL;
+	}
+}
+
+static void
+dummy_close(void *handle)
+{
+	rapdu_len = 0;
+	vicc_exit(handle);
+}
+
+static void hexdump(const char *title, const unsigned char *s, size_t l)
+{
+    size_t n=0;
+
+    fprintf(stdout,"%s",title);
+
+    if (!s) {
+        fprintf(stdout,"(null)\n");
+    } else {
+        for(; n < l; ++n)
+        {
+            if((n%16) == 0)
+                fprintf(stdout,"\n    ");
+            fprintf(stdout,"%02x:",(unsigned char) s[n]);
+        }
+        fprintf(stdout,"\n");
+    }
+}
+
+static int
+dummy_read(void *handle, unsigned char *buf, size_t len, int ms)
+{
+	(void)ms;
+	(void)handle;
+
+	if (rapdu_len < 0) {
+		return (-1);
+	}
+	if (len < (size_t) rapdu_len) {
+		return (-1);
+	}
+	memcpy(buf, rapdu, rapdu_len);
+	hexdump("read", rapdu, rapdu_len);
+
+	return rapdu_len;
+}
+
+static int
+dummy_write(void *handle, const unsigned char *buf, size_t len)
+{
+	hexdump("in", buf, len);
+	rapdu_len = vicc_transmit(handle, len, buf, &rapdu);
+	if (rapdu_len < 0) {
+		return (-1);
+	}
+	hexdump("out", rapdu, rapdu_len);
+	return len;
+}
+
+void set_vicc(fido_dev_t *dev);
+void set_vicc(fido_dev_t *dev)
+{
+	fido_dev_io_t io_f;
+
+	io_f.open = dummy_open;
+	io_f.close = dummy_close;
+	io_f.read = dummy_read;
+	io_f.write = dummy_write;
+
+	fido_dev_force_fido2(dev);
+	fido_dev_set_io_functions(dev, &io_f);
+}
+
 fido_dev_t *
 open_dev(const char *path)
 {
@@ -121,6 +212,8 @@ open_dev(const char *path)
 
 	if ((dev = fido_dev_new()) == NULL)
 		errx(1, "fido_dev_new");
+
+	set_vicc(dev);
 
 	r = fido_dev_open(dev, path);
 	if (r != FIDO_OK)

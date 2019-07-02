@@ -26,6 +26,8 @@ add_executable(fido2-cred
 	cred_verify.c
 	base64.c
 	util.c
+	vpcd.c
+	lock.c
 	${COMPAT_SOURCES}
 )
 
@@ -35,6 +37,8 @@ add_executable(fido2-assert
 	assert_verify.c
 	base64.c
 	util.c
+	vpcd.c
+	lock.c
 	${COMPAT_SOURCES}
 )
 
@@ -45,6 +49,8 @@ add_executable(fido2-token
 	pin.c
 	token.c
 	util.c
+	vpcd.c
+	lock.c
 	${COMPAT_SOURCES}
 )
 

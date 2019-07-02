@@ -67,7 +67,7 @@ fail:
 static int
 fido_dev_open_tx(fido_dev_t *dev, const char *path)
 {
-	const uint8_t cmd = CTAP_FRAME_INIT | CTAP_CMD_INIT;
+	/*const uint8_t cmd = CTAP_FRAME_INIT | CTAP_CMD_INIT;*/
 
 	if (dev->io_handle != NULL) {
 		log_debug("%s: handle=%p", __func__, dev->io_handle);
@@ -89,12 +89,14 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 		return (FIDO_ERR_INTERNAL);
 	}
 
+#if 0
 	if (tx(dev, cmd, &dev->nonce, sizeof(dev->nonce)) < 0) {
 		log_debug("%s: tx", __func__);
 		dev->io.close(dev->io_handle);
 		dev->io_handle = NULL;
 		return (FIDO_ERR_TX);
 	}
+#endif
 
 	return (FIDO_OK);
 }
@@ -102,9 +104,11 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 static int
 fido_dev_open_rx(fido_dev_t *dev, int ms)
 {
-	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_INIT;
-	int		r;
+	(void)ms;
+	/*const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_INIT;*/
+	/*int		r;*/
 
+#if 0
 	if ((r = rx(dev, cmd, &dev->attr, sizeof(dev->attr), ms)) < 0) {
 		log_debug("%s: rx", __func__);
 		return (FIDO_ERR_RX);
@@ -118,6 +122,7 @@ fido_dev_open_rx(fido_dev_t *dev, int ms)
 		log_debug("%s: invalid nonce", __func__);
 		return (FIDO_ERR_RX);
 	}
+#endif
 
 	dev->cid = dev->attr.cid;
 
