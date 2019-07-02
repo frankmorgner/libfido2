@@ -105,10 +105,10 @@ static int
 fido_dev_open_rx(fido_dev_t *dev, int ms)
 {
 	(void)ms;
-	/*const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_INIT;*/
-	/*int		r;*/
-
 #if 0
+	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_INIT;
+	int		r;
+
 	if ((r = rx(dev, cmd, &dev->attr, sizeof(dev->attr), ms)) < 0) {
 		log_debug("%s: rx", __func__);
 		return (FIDO_ERR_RX);

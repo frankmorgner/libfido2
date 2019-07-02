@@ -120,12 +120,6 @@ tx(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
 
 	return (0);
 #endif
-	unsigned char select[] = {0x00, 0xA4, 0x00, 0x00, 0x08, 0xA0, 0x00, 0x00, 0x06, 0x47, 0x2f, 0x00, 0x01, 0x00};
-
-	int n = d->io.write(d->io_handle, select, sizeof select);
-	if (n < 0)
-		return -1;
-
 	unsigned char apdu[0xFFFF+6];
 	apdu[0] = 0x80;
 	apdu[1] = 0x10;
@@ -138,7 +132,7 @@ tx(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
 	apdu[7+count] = 0x00;
 	apdu[8+count] = 0x00;
 
-	n = d->io.write(d->io_handle, apdu, 9+count);
+	int n = d->io.write(d->io_handle, apdu, 9+count);
 	if (n < 0 || (size_t)n != 9+count)
 		return -1;
 
